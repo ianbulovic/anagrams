@@ -1,0 +1,75 @@
+@import url("https://fonts.googleapis.com/css2?family=Sometype+Mono:ital,wght@0,400..700;1,400..700&display=swap");
+@import "tailwindcss";
+
+html {
+  font-family: "Sometype Mono", monospace;
+  color: var(--color-amber-100);
+  background-color: var(--color-slate-900);
+}
+
+button {
+  background-color: var(--color-amber-400);
+  color: var(--color-slate-900);
+  padding: 0.5rem;
+  font-size: x-large;
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0px 5px var(--color-amber-800);
+  transition: all 0.1s;
+  cursor: pointer;
+}
+
+button:hover:enabled {
+  box-shadow: 0px 4px var(--color-amber-800);
+  translate: 0px 1px;
+  text-decoration: underline solid currentColor 1px;
+}
+
+button:active:enabled {
+  box-shadow: 0px 1px var(--color-amber-800);
+  translate: 0px 4px;
+}
+
+button:disabled {
+  filter: brightness(50%) saturate(80%);
+  cursor: not-allowed;
+}
+
+input {
+  background-color: var(--color-slate-800);
+  padding: 1rem;
+  border-radius: 10px;
+  caret-color: var(--color-amber-300);
+}
+
+input:focus {
+  outline: 1px solid var(--color-amber-300);
+}
+
+@keyframes wiggle {
+  33% {
+    transform: rotate(1deg) translate(-5px, 0px);
+  }
+
+  66% {
+    transform: rotate(-1deg) translate(5px, 0px);
+  }
+}
+
+@keyframes bulge {
+  33% {
+    transform: scale(110%);
+  }
+
+  66% {
+    transform: scale(95%);
+  }
+}
+
+.wiggle {
+  animation: wiggle 0.2s;
+}
+
+.bulge {
+  animation: bulge 0.3s;
+}
