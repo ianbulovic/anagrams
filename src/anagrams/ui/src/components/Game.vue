@@ -135,7 +135,7 @@ defineExpose({ handleErr });
 
         <!-- First half of player list -->
         <div class="xl:flex flex-row gap-10 w-full justify-around my-3 hidden">
-            <template v-for="(player, index) in state.players">
+            <template v-for="(player, index) in state.players" :key="player.name + player.score">
                 <PlayerInfo v-if="index < state.players.length / 2" :player="player" :index="index"
                     :kickPlayer="playerOne ? kickPlayer : undefined" />
             </template>
@@ -156,7 +156,7 @@ defineExpose({ handleErr });
 
         <!-- Second half of player list -->
         <div class="xl:flex flex-row gap-10 w-full justify-around my-3 hidden">
-            <template v-for="(player, index) in state.players">
+            <template v-for="(player, index) in state.players" :key="player.name + player.score">
                 <PlayerInfo v-if="index >= state.players.length / 2" :player="player" :index="index"
                     :kickPlayer="playerOne ? kickPlayer : undefined" />
             </template>
@@ -164,7 +164,7 @@ defineExpose({ handleErr });
     </div>
     <!-- Second half of player list -->
     <div class="flex flex-row gap-10 w-full justify-around mb-6 xl:hidden">
-        <template v-for="(player, index) in state.players">
+        <template v-for="(player, index) in state.players" :key="player.name + player.score">
             <PlayerInfo :player="player" :index="index" :kickPlayer="playerOne ? kickPlayer : undefined" />
         </template>
     </div>
