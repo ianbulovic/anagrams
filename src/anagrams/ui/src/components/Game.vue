@@ -131,7 +131,7 @@ defineExpose({ handleErr });
         </div>
     </div>
 
-    <div class="xl:grid grid-rows-1 grid-cols-3 w-full mb-3">
+    <div class="xl:grid grid-rows-1 grid-cols-3 w-full mb-3 items-end">
 
         <!-- First half of player list -->
         <div class="xl:flex flex-row gap-10 w-full justify-around my-3 hidden">
