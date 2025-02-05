@@ -6,8 +6,8 @@ from fastapi import WebSocket
 
 from anagrams.core.player import Player
 
-from ..core.dictionary import Dictionary
-from ..core.game import Game
+from ..core.dictionary import Dictionary, same_root
+from ..core.game import AnagramStrategy, Game
 from .log import get_logger
 from .messages import Message
 
@@ -140,7 +140,7 @@ class GameManager:
         if word not in self.dictionary:
             await self.send_err(
                 client_id,
-                "unknown_word",
+                "invalid_word",
                 f"{word.title()} is not in the dictionary.",
             )
             return
@@ -149,13 +149,32 @@ class GameManager:
         if len(strategies) == 0:
             await self.send_err(
                 client_id,
-                "unconstructable_word",
+                "invalid_word",
                 f"{word} could not be made from the current tiles.",
             )
             return
 
+        def has_same_root(strategy: AnagramStrategy):
+            for _, w in strategy:
+                if len(w) > 1 and same_root(word, w):
+                    return w
+            return None
+
+        while len(strategies) > 0:
+            strategy = strategies[0]
+            w = has_same_root(strategy)
+            if w is None:
+                break
+            strategies.pop(0)
+        else:
+            await self.send_err(
+                client_id,
+                "invalid_word",
+                f"{word} and {w} have the same root.",
+            )
+            return
+
         # TODO let the user select the strategy
-        strategy = strategies[0]
         game.execute_anagram_strategy(strategy)
         player = game.players[client_id]
         player.words.append(word)

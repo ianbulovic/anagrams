@@ -1,9 +1,8 @@
-import itertools
 from typing import Counter
 from uuid import UUID
 
 from .player import Player
-from .utils import contains_anagrammed_substring, weighted_random_letter
+from .utils import weighted_random_letter
 
 AnagramStrategy = tuple[tuple[UUID | None, str], ...]
 """
@@ -20,6 +19,7 @@ class Game:
 
     def __init__(self):
         self.letter_pool: list[str] = []
+        self.letter_pool_counter: Counter[str] = Counter()
         self.players: dict[UUID, Player] = {}
         self.turn_order: list[UUID] = []
         self._turn_idx: int = 0
@@ -51,32 +51,54 @@ class Game:
         self._turn_idx %= len(self.turn_order)
         self.turns += 1
 
+    def add_letter(self, letter: str):
+        self.letter_pool.append(letter)
+        self.letter_pool_counter.update(letter)
+
+    def remove_letter(self, letter: str):
+        self.letter_pool.remove(letter)
+        self.letter_pool_counter.subtract(letter)
+
     def new_letter(self, temperature: float = 0):
-        self.letter_pool.append(weighted_random_letter(temperature))
+        letter = weighted_random_letter(temperature)
+        self.add_letter(letter)
 
     def get_anagram_strategies(self, target: str):
         """
         Find all ways to assemble a target string by anagramming any number
         of player words and letter pool letters.
         """
-        candidates: list[tuple[UUID | None, str]] = [
-            (None, letter) for letter in self.letter_pool if letter in target
-        ]
-        for id, player in self.players.items():
-            candidates.extend(
-                [
-                    (id, w)
-                    for w in player.words
-                    if contains_anagrammed_substring(target, w)
-                ]
-            )
-        strategies: list[AnagramStrategy] = []
+        candidates: list[tuple[UUID | None, str, Counter[str]]] = []
+
         target_counter = Counter(target)
-        for n in range(2, len(candidates) + 1):
-            for combo in itertools.combinations(candidates, n):
-                if target_counter == Counter("".join([sub for _, sub in combo])):
-                    strategies.append(combo)
-        return strategies
+        for pid, player in self.players.items():
+            for word in player.words:
+                ctr = Counter(word)
+                if ctr <= target_counter and not ctr == target_counter:
+                    candidates.append((pid, word, Counter(word)))
+
+        results: list[AnagramStrategy] = []
+        current_strategy: list[tuple[UUID | None, str]] = []
+
+        def backtrack(remaining: Counter, start: int):
+            if remaining <= self.letter_pool_counter:
+                strat = tuple(
+                    current_strategy
+                    + [(None, letter) for letter in remaining.elements()]
+                )
+                results.append(strat)
+                return
+
+            for i in range(start, len(candidates)):
+                src, w, c = candidates[i]
+                if not c <= remaining:
+                    continue
+                current_strategy.append((src, w))
+                backtrack(remaining - c, i + 1)
+                current_strategy.pop()
+
+        backtrack(target_counter, 0)
+        return results
 
     def validate_anagram_strategy(self, strategy: AnagramStrategy):
         """Checks if an anagram strategy can be executed."""
@@ -97,7 +119,7 @@ class Game:
         """
         for source, word in strategy:
             if source is None:
-                self.letter_pool.remove(word)
+                self.remove_letter(word)
             else:
                 player = self.players[source]
                 player.words.remove(word)

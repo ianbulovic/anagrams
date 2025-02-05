@@ -1,6 +1,11 @@
+import functools
 import os
 import re
 from typing import Iterable
+
+from nltk.stem import WordNetLemmatizer
+
+lemmatizer = WordNetLemmatizer()
 
 
 class TrieNode:  # TODO needs tests but i think it works
@@ -57,7 +62,9 @@ class TrieNode:  # TODO needs tests but i think it works
         return False
 
 
-DEFAULT_DICTIONARY_FILE = os.path.join(os.path.split(__file__)[0], "scrabble.txt")
+SCRABBLE_DICTIONARY_FILE = os.path.join(os.path.split(__file__)[0], "scrabble.txt")
+TWO_OF_TWELVE_INF_FILE = os.path.join(os.path.split(__file__)[0], "2of12inf.txt")
+DEFAULT_DICTIONARY_FILE = TWO_OF_TWELVE_INF_FILE
 
 
 class Dictionary:
@@ -81,11 +88,13 @@ class Dictionary:
             with open(filepath) as f:
                 if rgx is None:
                     for line in f:
-                        yield line.strip()
+                        line = line.strip()
+                        if line:
+                            yield line
                 else:
                     for line in f:
                         line = line.strip()
-                        if rgx.fullmatch(line) is not None:
+                        if line and rgx.fullmatch(line) is not None:
                             yield line
 
         return Dictionary(_iter())
@@ -100,3 +109,11 @@ class Dictionary:
 
     def __len__(self):
         return self._size
+
+
+@functools.cache
+def same_root(word_1: str, word_2: str):
+    def lemma_set(word: str):
+        return {lemmatizer.lemmatize(word, pos) for pos in "nvars"}
+
+    return len(lemma_set(word_1).intersection(lemma_set(word_2))) > 0

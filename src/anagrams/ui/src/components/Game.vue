@@ -102,7 +102,7 @@ const handleErr = function (message) {
     const err_type = message["err_type"];
     const err_desc = message["description"];
 
-    if (err_type === "unknown_word" || err_type == "unconstructable_word") {
+    if (err_type === "invalid_word") {
         inputFail(err_desc);
     }
 }

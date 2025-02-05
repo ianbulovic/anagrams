@@ -3,15 +3,6 @@ from collections.abc import Iterable
 from random import random
 
 
-def contains_anagrammed_substring(word: str, sub: str):
-    w_counter = Counter(word)
-    s_counter = Counter(sub)
-    for letter in s_counter:
-        if letter not in w_counter or w_counter[letter] < s_counter[letter]:
-            return False
-    return True
-
-
 def is_anagram(target: str, pieces: Iterable[str]):
     return Counter(target) == Counter("".join(pieces))
 
